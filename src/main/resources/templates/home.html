@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Trang chủ Realtime</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    
+    <style>
+        /* CSS cho cái hộp thông báo */
+        #notification-area {
+            position: fixed; top: 20px; right: 20px;
+            background-color: #28a745; color: white;
+            padding: 15px; border-radius: 5px; display: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 9999;
+            animation: slideIn 0.5s;
+        }
+        @keyframes slideIn { from {right: -300px;} to {right: 20px;} }
+    </style>
+</head>
+<body>
+	<h1>Chào mừng đến với ứng dụng Spring Boot</h1>
+	<a href="/user-info">👉 Xem Hồ Sơ Cá Nhân</a>
+	
+    <h1>Hệ thống Notification Realtime</h1>
+    
+    <a href="/send-email-queue?email=test@gmail.com" target="_blank">
+        🚀 Bấm vào đây để test gửi Mail (Tab mới)
+    </a>
+
+    <div id="notification-area"></div>
+
+    <script type="text/javascript">
+        var stompClient = null;
+
+        function connect() {
+            // 1. Kết nối tới endpoint '/ws'
+            var socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Đã kết nối WebSocket: ' + frame);
+                
+                // 2. Đăng ký nghe kênh '/topic/notifications'
+                stompClient.subscribe('/topic/notifications', function (message) {
+                    // Khi có tin nhắn đến, gọi hàm hiển thị
+                    showNotification(message.body);
+                });
+            });
+        }
+
+        function showNotification(messageText) {
+            var noti = document.getElementById("notification-area");
+            noti.innerText = messageText;
+            noti.style.display = "block"; // Hiện lên
+
+            // Tự ẩn sau 5 giây
+            setTimeout(function() {
+                noti.style.display = "none";
+            }, 5000);
+        }
+
+        // Tự động kết nối khi load trang
+        connect();
+    </script>
+</body>
+</html>
