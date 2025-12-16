@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* ... giữ nguyên style cũ ... */
+        body { background-color: #f8f9fa; }
+        .dashboard-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>🛠️ Dashboard Quản Trị</h1>
+        <a href="/" class="btn btn-outline-secondary">Về trang chủ</a>
+    </div>
+
+    <div class="alert alert-primary">
+        Xin chào Sếp: <strong><span th:text="${userName}">Admin</span></strong>!
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="dashboard-card text-center">
+                <h3>💰 Doanh thu hôm nay</h3>
+                <h2 class="text-success" th:text="${revenue}">...</h2>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <h3>📊 Báo cáo & Dữ liệu</h3>
+                <a href="/admin/users/export/excel" class="btn btn-success w-100 mb-2">
+                    <i class="fa-solid fa-users"></i> Tải danh sách User (.xlsx)
+                </a>
+                <a href="/admin/logs/export/excel" class="btn btn-warning text-white w-100">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Tải nhật ký hoạt động (.xlsx)
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h3>📈 Thống kê lượt đăng nhập (7 ngày qua)</h3>
+                <canvas id="loginChart" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Gọi API lấy dữ liệu từ Backend
+        fetch('/admin/api/chart/login-stats')
+            .then(response => response.json())
+            .then(data => {
+                // Tách dữ liệu thành 2 mảng: Nhãn (Ngày) và Giá trị (Số lượt)
+                const labels = data.map(item => item.label);
+                const values = data.map(item => item.value);
+
+                // Cấu hình Chart.js
+                const ctx = document.getElementById('loginChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar', // Loại biểu đồ: bar (cột), line (đường), pie (tròn)
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Số lượt đăng nhập',
+                            data: values,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)', // Màu xanh
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 } // Chỉ hiện số nguyên
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Lỗi tải biểu đồ:', error));
+    });
+</script>
+
+</body>
+</html>

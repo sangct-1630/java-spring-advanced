@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hồ sơ người dùng</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .card { border: 1px solid #ccc; padding: 20px; display: inline-block; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn { padding: 10px 20px; text-decoration: none; color: white; border-radius: 5px; cursor: pointer; border: none; }
+        .btn-google { background-color: #db4437; }
+        .btn-logout { background-color: #333; }
+        img { border-radius: 50%; width: 100px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div th:unless="${isLoggedIn}">
+            <h2>Bạn chưa đăng nhập!</h2>
+            <p>Vui lòng đăng nhập để xem thông tin bí mật.</p>
+            <a href="/oauth2/authorization/google" class="btn btn-google">
+                Login with Google
+            </a>
+        </div>
+
+        <div th:if="${isLoggedIn}">
+            <img th:src="${picture}" alt="Avatar">
+            <h2 th:text="'Xin chào, ' + ${name} + '!'"></h2>
+            <p th:text="'Email: ' + ${email}"></p>
+            
+            <hr>
+            
+            <form action="/logout" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn-logout">Đăng xuất (Logout)</button>
+            </form>
+        </div>
+    </div>
+    
+    <br><br>
+    <a href="/">⬅️ Quay về trang chủ</a>
+
+</body>
+</html>
